@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { Layout } from "antd";
+import { Layout } from 'antd';
 
 function App() {
   return (
@@ -13,7 +13,6 @@ function App() {
         <Layout.Content>ini content</Layout.Content>
         <Layout.Footer>ini footer</Layout.Footer>
       </Layout>
-
     </div>
   );
 }
