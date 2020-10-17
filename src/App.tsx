@@ -1,26 +1,18 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { DatePicker } from 'antd';
+import { Layout } from 'antd';
 
 function App() {
   return (
     <div className="App">
-      <DatePicker />
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Layout>
+        <Layout>
+          <Layout.Sider>ini sider</Layout.Sider>
+        </Layout>
+        <Layout.Header>ini header</Layout.Header>
+        <Layout.Content>ini content</Layout.Content>
+        <Layout.Footer>ini footer</Layout.Footer>
+      </Layout>
     </div>
   );
 }
