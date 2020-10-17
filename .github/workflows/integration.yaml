@@ -1,0 +1,17 @@
+name: integration
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+jobs:
+  linting:
+    name: linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Install dependency
+        run: npm install
+      - name: Run eslint
+        run: npm run lint:eslint  
+      - name: Run tsc
+        run: npm run lint:tsc
