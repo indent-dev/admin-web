@@ -7,11 +7,19 @@ jobs:
     name: linting
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: checkout code
         uses: actions/checkout@master
-      - name: Install dependency
-        run: npm install
-      - name: Run eslint
-        run: npm run lint:eslint  
-      - name: Run tsc
+      - name: install dependency
+        run: npm install  
+      - name: run tsc
         run: npm run lint:tsc
+  unit-test:
+    name: unit test
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@master
+      - name: install dependency
+        run: npm install
+      - name: run unit test
+        run: npm run test
