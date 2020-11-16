@@ -1,9 +1,7 @@
 import React from 'react';
 import './App.css';
-import { Layout } from "antd";
-import { Menu } from "antd";
+import { Menu, Table, Layout } from "antd";
 import "antd/dist/antd.css";
-import { Table } from "antd"
 import { ColumnsType } from 'antd/lib/table';
 
 type Category = {
