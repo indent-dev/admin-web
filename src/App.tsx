@@ -36,6 +36,7 @@ function App() {
       .then(json => {
         setCategory(json)
         setLoading(false)
+        setError("")
       })
       .catch((error) => {
         setLoading(false)
