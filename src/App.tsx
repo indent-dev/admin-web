@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
-import { Menu, Table, Layout } from "antd";
+import { Menu, Table, Layout, Alert } from "antd";
 import "antd/dist/antd.css";
 import { ColumnsType } from 'antd/lib/table';
 
@@ -9,6 +9,12 @@ type Category = {
 }
 
 function App() {
+
+  const [category, setCategory] = useState<Category[]>([])
+
+  const [error, setError] = useState<string>("")
+
+  const [loading, setLoading] = useState<boolean>(false)
 
   const colums: ColumnsType<Category> = [
     {
@@ -22,23 +28,22 @@ function App() {
       dataIndex: "name",
     },
   ]
-  const data: Category[] = [
-    {
-      name: "Pakaian Pria"
-    },
-    {
-      name: "Komputer & Aksesories"
-    },
-    {
-      name: "Perawatan & Kecantikan"
-    },
-    {
-      name: "Perlengkapan Rumah"
-    },
-    {
-      name: "Elektronik"
-    },
-  ]
+
+  useEffect(() => {
+    setLoading(true)
+    fetch("https://product-service-indent.herokuapp.com/category")
+      .then(response => response.json())
+      .then(json => {
+        setCategory(json)
+        setLoading(false)
+        setError("")
+      })
+      .catch((error) => {
+        setLoading(false)
+        setError(error.message)
+
+      })
+  }, [])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -54,7 +59,14 @@ function App() {
       <Layout>
         <Layout.Header>ini header</Layout.Header>
         <Layout.Content>
-          <Table columns={colums} dataSource={data} />
+          {error && <Alert
+            message="Fetching Failed"
+            description={error}
+            type="error"
+            closable
+          />}
+
+          <Table columns={colums} dataSource={category} loading={loading} />
         </Layout.Content>
         <Layout.Footer>ini footer</Layout.Footer>
       </Layout>
