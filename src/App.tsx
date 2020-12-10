@@ -1,39 +1,111 @@
 import React, { useState } from 'react';
 import './App.css';
-import { Menu, Table, Layout, Alert, Input as AntdInput, Button } from 'antd';
+import {
+  Menu,
+  Table,
+  Layout,
+  Alert,
+  Input as AntdInput,
+  Button,
+  Modal,
+} from 'antd';
 import 'antd/dist/antd.css';
 import { ColumnsType } from 'antd/lib/table';
 import useFetchCategory from './useFetchCategory';
-
-type Category = {
-  name: string;
-};
+import { Category } from './useFetchCategory';
 
 function App() {
-  const { categories, status, error, createCategory } = useFetchCategory();
+  const {
+    categories,
+    status,
+    error,
+    createCategory,
+    editCategory,
+    deleteCategory,
+  } = useFetchCategory();
 
-  const [categoryName, setCategoryName] = useState('');
+  const [categoryName, setCategoryName] = useState<string>('');
+
+  const [categoryNameEdit, setCategoryNameEdit] = useState<string>('');
+
+  const [categoryIdEdit, setCategoryIdEdit] = useState<string>('');
+
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  const [categoryDelete, setCategoryDelete] = useState<string>('');
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCategoryName(event.target.value);
   };
-
-  const handleAddButtonClick = () => {
+  const handleAddButtonClick = (
+    event: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => {
     createCategory(categoryName).then(() => {
       setCategoryName('');
     });
   };
-
+  const handleShowModal = (categoryName: string, categoryId: string) => {
+    setCategoryNameEdit(categoryName);
+    setCategoryIdEdit(categoryId);
+    setIsModalVisible(true);
+  };
+  const handleOk = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    editCategory({ name: categoryNameEdit, id: categoryIdEdit });
+    setIsModalVisible(false);
+  };
+  const handleCancel = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    setIsModalVisible(false);
+  };
+  const handleEditCategory = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCategoryNameEdit(event.target.value);
+  };
+  const handleDeleteCategory = (id: string) => {
+    deleteCategory({ name: categoryDelete, id });
+    setCategoryDelete(categoryDelete);
+  };
   const colums: ColumnsType<Category> = [
     {
       title: 'No',
-      render: (text, record, index: number) => {
+      render: (text, record, index) => {
         return index + 1;
       },
     },
     {
       title: 'Categories',
       dataIndex: 'name',
+    },
+    {
+      title: 'Edit',
+      key: 'edit',
+      render: (text, record, index) => {
+        const categoryName = categories ? categories[index].name : '';
+        const categoryId = categories ? categories[index]._id : '';
+
+        return (
+          <Button
+            type="primary"
+            onClick={() => {
+              handleShowModal(categoryName, categoryId);
+            }}
+          >
+            Edit
+          </Button>
+        );
+      },
+    },
+    {
+      title: 'Delete',
+      key: 'delete',
+      render: (text, record, index) => {
+        return (
+          <Button
+            type="primary"
+            onClick={() => handleDeleteCategory(record._id)}
+          >
+            Delete
+          </Button>
+        );
+      },
     },
   ];
 
@@ -73,6 +145,18 @@ function App() {
               dataSource={categories}
               loading={status === 'loading'}
             />
+            <Modal
+              title="Edit Category"
+              visible={isModalVisible}
+              onOk={handleOk}
+              onCancel={handleCancel}
+            >
+              <AntdInput
+                type="text"
+                value={categoryNameEdit}
+                onChange={handleEditCategory}
+              />
+            </Modal>
           </>
         </Layout.Content>
         <Layout.Footer>ini footer</Layout.Footer>
@@ -80,5 +164,4 @@ function App() {
     </Layout>
   );
 }
-
 export default App;
