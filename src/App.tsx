@@ -9,7 +9,6 @@ import {
   Button,
   Modal,
 } from 'antd';
-import 'antd/dist/antd.css';
 import { ColumnsType } from 'antd/lib/table';
 import useFetchCategory from './useFetchCategory';
 import { Category } from './useFetchCategory';
@@ -37,9 +36,7 @@ function App() {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCategoryName(event.target.value);
   };
-  const handleAddButtonClick = (
-    event: React.MouseEvent<HTMLElement, MouseEvent>
-  ) => {
+  const handleAddButtonClick = () => {
     createCategory(categoryName).then(() => {
       setCategoryName('');
     });
@@ -49,11 +46,11 @@ function App() {
     setCategoryIdEdit(categoryId);
     setIsModalVisible(true);
   };
-  const handleOk = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleOk = () => {
     editCategory({ name: categoryNameEdit, id: categoryIdEdit });
     setIsModalVisible(false);
   };
-  const handleCancel = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleCancel = () => {
     setIsModalVisible(false);
   };
   const handleEditCategory = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +73,6 @@ function App() {
     },
     {
       title: 'Edit',
-      key: 'edit',
       render: (text, record, index) => {
         const categoryName = categories ? categories[index].name : '';
         const categoryId = categories ? categories[index]._id : '';
@@ -96,7 +92,7 @@ function App() {
     {
       title: 'Delete',
       key: 'delete',
-      render: (text, record, index) => {
+      render: (record) => {
         return (
           <Button
             type="primary"

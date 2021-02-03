@@ -54,7 +54,6 @@ const requestDeleteCategory = async (variable: {
       },
     }
   );
-  console.log(variable.id);
   const categories = await res.json();
   return categories;
 };
@@ -88,7 +87,7 @@ export default function useFetchCategory() {
           return category._id === newCategory._id;
         });
         categories[editedCategoryIndex] = {
-          _id: newCategory.name,
+          _id: newCategory._id,
           name: newCategory.name,
           isDeleted: newCategory.isDeleted,
         };
@@ -115,7 +114,7 @@ export default function useFetchCategory() {
           prevCategory ? prevCategory : []
         );
     },
-    onError: (error, deleteCategory, rollback) => {
+    onError: (error, rollback) => {
       rollback ? rollback : error;
     },
     onSettled: (data, error, deletedCategory) => {
@@ -137,3 +136,10 @@ export default function useFetchCategory() {
     deleteCategory,
   };
 }
+
+export {
+  requestGetCategory,
+  requestCreateCategory,
+  requestDeleteCategory,
+  requestEditCategory,
+};
