@@ -96,7 +96,7 @@ export default function useFetchCategory() {
     },
   });
 
-  const [deleteCategory] = useMutation<
+  const  [deleteCategory] = useMutation<
     Category,
     Error,
     { name: string; id: string }
@@ -113,10 +113,7 @@ export default function useFetchCategory() {
           'categories',
           prevCategory ? prevCategory : []
         );
-    },
-    onError: (error, rollback) => {
-      rollback ? rollback : error;
-    },
+    },    
     onSettled: (data, error, deletedCategory) => {
       queryCache.removeQueries(['categories', deletedCategory.id]);
       queryCache.refetchQueries('categories');
