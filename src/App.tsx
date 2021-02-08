@@ -148,6 +148,7 @@ function App() {
               onCancel={handleCancel}
             >
               <AntdInput
+                aria-label="Edit Category"
                 type="text"
                 value={categoryNameEdit}
                 onChange={handleEditCategory}
