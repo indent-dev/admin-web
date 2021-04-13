@@ -13,14 +13,19 @@ import { ColumnsType } from 'antd/lib/table';
 import useFetchCategory from './useFetchCategory';
 import { Category } from './useFetchCategory';
 
+type Loading = boolean  
+
 function App() {
   const {
     categories,
     status,
     error,
     createCategory,
+    createCategoryStatus,
     editCategory,
+    editCategoryStatus,
     deleteCategory,
+    deleteCategoryStatus
   } = useFetchCategory();
 
   const [categoryName, setCategoryName] = useState<string>('');
@@ -32,6 +37,17 @@ function App() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const [categoryDelete, setCategoryDelete] = useState<string>('');
+
+  const [loadings,setLoading] = useState<Loading[]>([])
+  const enterLoading = (index:number) => {
+    const newLoadings = [...loadings]
+    newLoadings[index] = true
+
+    return {
+      loadings: newLoadings
+    }
+  }
+
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCategoryName(event.target.value);
@@ -47,8 +63,9 @@ function App() {
     setIsModalVisible(true);
   };
   const handleOk = () => {
-    editCategory({ name: categoryNameEdit, id: categoryIdEdit });
-    setIsModalVisible(false);
+    editCategory({ name: categoryNameEdit, id: categoryIdEdit }).then(() => {
+      setIsModalVisible(false);
+    })
   };
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -95,6 +112,7 @@ function App() {
       render: (record) => {
         return (
           <Button
+            loading={deleteCategoryStatus === "loading"}
             type="primary"
             onClick={() => handleDeleteCategory(record._id)}
           >
@@ -124,7 +142,7 @@ function App() {
                 value={categoryName}
                 onChange={handleInputChange}
               />
-              <Button type="primary" onClick={handleAddButtonClick}>
+              <Button loading={createCategoryStatus === "loading"} type="primary" onClick={handleAddButtonClick}>
                 Add Category
               </Button>
             </div>
@@ -139,15 +157,17 @@ function App() {
             <Table
               columns={colums}
               dataSource={categories}
-              loading={status === 'loading'}
+              loading={{ tip:"Wait a second", spinning: status === "loading"}}
             />
             <Modal
+              okButtonProps={{ loading: editCategoryStatus === "loading" }}
               title="Edit Category"
               visible={isModalVisible}
               onOk={handleOk}
               onCancel={handleCancel}
             >
               <AntdInput
+                aria-label="Edit Category"
                 type="text"
                 value={categoryNameEdit}
                 onChange={handleEditCategory}

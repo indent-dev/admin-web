@@ -1,4 +1,4 @@
-import { queryCache, useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 export type Category = {
   name: string;
@@ -7,29 +7,24 @@ export type Category = {
 };
 
 const requestGetCategory = async () => {
-  const res = await fetch(
-    'https://product-service-indent.herokuapp.com/category'
-  );
+  const res = await fetch(`${process.env.REACT_APP_CATEGORY_URL}`);
   return res.json();
 };
 
 const requestCreateCategory = async (newCategory: string) => {
-  const res = await fetch(
-    'https://product-service-indent.herokuapp.com/category',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name: newCategory }),
-    }
-  );
+  const res = await fetch(`${process.env.REACT_APP_CATEGORY_URL}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name: newCategory }),
+  });
   const categories = await res.json();
   return categories;
 };
 const requestEditCategory = async (variable: { name: string; id: string }) => {
   const res = await fetch(
-    'https://product-service-indent.herokuapp.com/category/' + variable.id,
+    `${process.env.REACT_APP_CATEGORY_URL}/` + variable.id,
     {
       method: 'PUT',
       headers: {
@@ -46,7 +41,7 @@ const requestDeleteCategory = async (variable: {
   id: string;
 }) => {
   const res = await fetch(
-    'https://product-service-indent.herokuapp.com/category/' + variable.id,
+    `${process.env.REACT_APP_CATEGORY_URL}/` + variable.id,
     {
       method: 'DELETE',
       headers: {
@@ -58,70 +53,70 @@ const requestDeleteCategory = async (variable: {
   return categories;
 };
 export default function useFetchCategory() {
+  const queryClient = useQueryClient();
+
   const { data, status, error } = useQuery<Category[], Error>(
     'categories',
     requestGetCategory
   );
 
-  const [createCategory] = useMutation<Category, Error, string>(
-    requestCreateCategory,
-    {
-      onSuccess: (newCategory) => {
-        queryCache.setQueryData<Category[]>('categories', (current) => [
-          ...(current ? current : []),
-          newCategory,
-        ]);
-      },
-    }
-  );
+  const {
+    mutateAsync: createCategory,
+    status: createCategoryStatus,
+  } = useMutation<Category, Error, string>(requestCreateCategory, {
+    onSuccess: (data: Category) => {
+      queryClient.setQueryData<Category[]>('categories', (current) => [
+        ...(current ? current : []),
+        data,
+      ]);
+    },
+  });
 
-  const [editCategory] = useMutation<
+  const { mutateAsync: editCategory, status: editCategoryStatus } = useMutation<
     Category,
     Error,
     { name: string; id: string }
   >(requestEditCategory, {
-    onSuccess: (newCategory) => {
-      queryCache.setQueryData<Category[]>('categories', (current) => {
-        const categories = [...(current ? current : [])];
-        const editedCategoryIndex = categories.findIndex((category) => {
-          return category._id === newCategory._id;
-        });
-        categories[editedCategoryIndex] = {
-          _id: newCategory._id,
-          name: newCategory.name,
-          isDeleted: newCategory.isDeleted,
-        };
-        return categories;
+    onSuccess: (data) => {
+      queryClient.setQueryData<Category[]>('categories', (current) => {
+        // const categories = [...(current ? current : [])];
+        // const editedCategoryIndex = categories.findIndex((category) => {
+        //   return category._id === data._id;
+        // });
+        // categories[editedCategoryIndex] = {
+        //   _id: data._id,
+        //   name: data.name,
+        //   isDeleted: data.isDeleted,
+        // };
+        // return categories;
+        return (
+          current?.map((category) =>
+            category._id === data._id ? data : category
+          ) ?? []
+        );
       });
     },
   });
 
-  const [deleteCategory] = useMutation<
+  const { mutate: deleteCategory, status: deleteCategoryStatus } = useMutation<
     Category,
     Error,
     { name: string; id: string }
   >(requestDeleteCategory, {
-    onMutate: (deletedCategory) => {
-      const prevCategory = queryCache.getQueryData<Category[]>('categories');
-      const updatedCategory = [...(prevCategory ? prevCategory : [])];
-      const removeCategory = updatedCategory.filter(
-        (eachCategory) => eachCategory._id !== deletedCategory.id
-      );
-      queryCache.setQueryData<Category[]>('categories', removeCategory);
-      return () =>
-        queryCache.setQueryData<Category[]>(
-          'categories',
-          prevCategory ? prevCategory : []
+    onSuccess: (data) => {
+      queryClient.setQueryData<Category[]>('categories', (current) => {
+        return (
+          current?.filter((category) => {
+            return category._id !== data._id;
+          }) ?? []
         );
-    },
-    onError: (error, rollback) => {
-      rollback ? rollback : error;
-    },
-    onSettled: (data, error, deletedCategory) => {
-      queryCache.removeQueries(['categories', deletedCategory.id]);
-      queryCache.refetchQueries('categories');
+      });
     },
   });
+
+  // () => { 5 }
+  // () => { return 5 }
+  // () => 5
 
   const categories = data?.filter((category) => {
     return !category.isDeleted;
@@ -132,14 +127,10 @@ export default function useFetchCategory() {
     categories,
     error,
     createCategory,
+    createCategoryStatus,
     editCategory,
+    editCategoryStatus,
     deleteCategory,
+    deleteCategoryStatus,
   };
 }
-
-export {
-  requestGetCategory,
-  requestCreateCategory,
-  requestDeleteCategory,
-  requestEditCategory,
-};
